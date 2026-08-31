@@ -1,0 +1,10 @@
+{
+  "description": "Streamlines project creation with an intuitive interface, enabling users to build fully functional web applications efficiently from start to finish.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
