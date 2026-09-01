@@ -1,6 +1,6 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
-import { AppProvider } from "./context";
+import { BrowserRouter, Routes, Route, Outlet, Navigate, useLocation } from "react-router-dom";
+import { AppProvider, useApp } from "./context";
 import { Navbar } from "./components/layout";
 import { Footer } from "./components/layout";
 import { ToastContainer } from "./components/ui";
@@ -34,8 +34,8 @@ import AdminReports from "./pages/admin/AdminReports";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminMealPlans from "./pages/admin/AdminMealPlans";
 
-// Layout wrapper for user-facing pages
-function UserLayout() {
+// Public layout: visible to everyone (landing page)
+function PublicLayout() {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -47,9 +47,39 @@ function UserLayout() {
   );
 }
 
-// Layout wrapper for auth pages (no nav/footer)
+// Protected layout: requires login — redirects to /login with return path
+function ProtectedLayout() {
+  const { currentUser } = useApp();
+  const location = useLocation();
+
+  if (!currentUser) {
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-1 pb-16 md:pb-0">
+        <Outlet />
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
+// Auth layout: bare pages (no nav/footer)
 function AuthLayout() {
   return <Outlet />;
+}
+
+// Protected cooking mode (full-screen, no nav)
+function ProtectedCookingMode() {
+  const { currentUser } = useApp();
+  const location = useLocation();
+  if (!currentUser) {
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
+  return <CookingMode />;
 }
 
 export default function App() {
@@ -57,9 +87,13 @@ export default function App() {
     <AppProvider>
       <BrowserRouter>
         <Routes>
-          {/* User-facing routes with navbar + footer */}
-          <Route element={<UserLayout />}>
+          {/* Landing page — public, no auth required */}
+          <Route element={<PublicLayout />}>
             <Route path="/" element={<Home />} />
+          </Route>
+
+          {/* Protected routes — require login */}
+          <Route element={<ProtectedLayout />}>
             <Route path="/meals" element={<Meals />} />
             <Route path="/meals/:id" element={<MealDetail />} />
             <Route path="/categories" element={<CategoriesPage />} />
@@ -69,8 +103,8 @@ export default function App() {
             <Route path="/profile" element={<Profile />} />
           </Route>
 
-          {/* Cooking mode — full screen, no nav */}
-          <Route path="/meals/:id/cook" element={<CookingMode />} />
+          {/* Cooking mode — full screen, protected */}
+          <Route path="/meals/:id/cook" element={<ProtectedCookingMode />} />
 
           {/* Auth routes — no nav/footer */}
           <Route element={<AuthLayout />}>

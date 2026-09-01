@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useApp } from "../../context";
 import { Input, Button } from "../../components/ui";
 
 export default function Register() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as { from?: string })?.from || "/";
   const { login, showToast } = useApp();
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", password: "", confirm: "" });
   const [agreed, setAgreed] = useState(false);
@@ -36,7 +38,7 @@ export default function Register() {
     const newUser = { id: `u-${Date.now()}`, firstName: form.firstName, lastName: form.lastName, email: form.email, phone: form.phone, role: "user" as const, status: "active" as const, joinedAt: new Date().toISOString().split("T")[0] };
     login(newUser);
     showToast(`Welcome to MenuDirectorate, ${form.firstName}!`);
-    navigate("/");
+    navigate(from, { replace: true });
     setLoading(false);
   };
 

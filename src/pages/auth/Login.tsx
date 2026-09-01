@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { USERS } from "../../data";
 import { useApp } from "../../context";
 import { Input, Button } from "../../components/ui";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as { from?: string })?.from || "/";
   const { login, showToast } = useApp();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,7 +25,7 @@ export default function Login() {
     if (user) {
       login(user);
       showToast(`Welcome back, ${user.firstName}!`);
-      navigate("/");
+      navigate(from, { replace: true });
     } else {
       setError("Invalid email or password. Try emem.akpan@email.com");
     }
@@ -56,6 +58,11 @@ export default function Login() {
             </Link>
             <h1 className="text-3xl font-bold text-[#1A1714] font-display">Welcome back</h1>
             <p className="text-[#706860] mt-1">Sign in to your account to continue.</p>
+            {from !== "/" && (
+              <div className="mt-3 p-3 bg-[#FFF3E8] border border-[#F5D0A9] rounded-lg text-xs text-[#E06000] font-medium">
+                Sign in to access that page.
+              </div>
+            )}
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
